@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ジャンケンゲーム</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<!-- タイトル -->
+<div id="op">
+<!-- opイメージ挿入 -->
+<div id="start_button"></div>
+</div>
+<section id="game_section">
+<header>
+    <h1>北斗のジャン拳</h1>
+</header>
+<main>
+    <!-- ゲーム区画のラッパー -->
+    <div class="game_wrapper">
+        <!-- 自分画面 -->
+        <div class="item box1">
+            <p>自分</p>
+             <img src="images/guu.png" alt="自分の手" id="my_img">
+             <div class="game_body">
+                <button class="role_button" id="my_guu" onclick="guu_display();selectRole_guu()">グー！</button>
+                <button class="role_button" id="my_choki" onclick="choki_display();selectRole_choki()">チョキ！</button>
+                <button class="role_button" id="my_paa" onclick="paa_display();selectRole_paa()">パー！</button>
+            </div>
+            <progress max="100" value="100" class="hp"></progress>       
+        </div>
+
+         <div class="item box2">
+            <p>VS</p>
+         </div>
+        <!-- 相手の状況 -->
+        <div class="item box3">
+           
+            <p>相手</p> 
+            <img src="images/click_here.jpg" alt="相手の手" id="enemy_img">
+            <progress max="100" value="100" class="yhp"></progress> 
+            
+        </div>     
+    </div>
+  
+    <div>
+       
+        <P class="shout">相手をクリックすると、ゲーム開始！<br>
+        掛け声に合わせて出したい手(ボタン)をクリック！</P>
+    </div>
+<!-- 最終勝敗表示 -->
+    <div id="final_result">
+
+    </div>
+
+    <button class="reset" onclick=Reset()>リセット</button>
+</main>
+<footer>
+    <small>copyrights 2021 Yasuharu Okazaki All RIghts Reserved. <br>
+    But Sorry for Unauthorized use of images...</small>
+</footer>
+</section>
+<!-- 以下スクリプト -->
+<script src="janken_js.js">
+
+
+
+
+</script>
+</body>
+
+</html>

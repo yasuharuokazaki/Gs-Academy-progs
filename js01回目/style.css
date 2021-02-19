@@ -1,0 +1,122 @@
+@charset "utf-8"
+
+*{
+    width:100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+main{
+    background-image: url(images/haikei.jpg);
+    background-size:cover;
+    object-fit: contain;
+}
+
+#kaishi{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    background-color: rgba(15, 253, 7, 0.466);
+    font-weight:bold;
+
+}
+
+#kaishi:hover{
+    background-color: rgba(237, 253, 7, 0.966);
+    color: #004280;
+}
+
+h1{
+    text-align: center;
+    font-size: 40px;
+}
+.game_wrapper{
+    display: flex;
+    justify-content: space-around;
+}
+
+.item{
+    text-align: center;
+}
+
+.box2 p{
+   
+    font-size:100px;
+    margin-top:0px;
+    padding-top:10rem;
+    height:auto;
+    box-sizing:border-box;
+    letter-spacing:1rem;
+    color:red;
+    font-weight:bold;
+     
+ }
+
+ p{
+     font-size: 25px;
+ }
+
+
+
+ #enemy_img{
+     width:240px;
+     height:320px;
+ }
+
+ #my_img{
+     width:240px;
+     height:320px;
+ }
+
+ .game_body{
+   position:relative;
+ }
+
+ .shout{
+    font-size: 40px;
+    text-align: center;
+    position: relative;
+    top: -40px;   
+    color:yellow;
+    font-weight:bold;  
+ }
+
+ button{
+     position: relative;
+     z-index: 10;
+ }
+
+ .hp{
+     margin-left:0px;
+     padding-top:20px;
+ }
+ .yhp{
+    display: block;
+    margin-left:30px;
+    margin-top:28px;
+    padding-top:20px;
+    
+}
+ .game_body{
+     padding-left:0;
+ }
+
+ .reset{
+     position:absolute;
+     top:83%;
+     font-size:30px;
+     left:0%;
+     right:0%;
+     margin:0 auto;
+ }
+ 
+ #final_result{
+    position:absolute;
+    top:25%;
+    left:3%;
+    font-size:15rem;
+    width:100%;
+    font-weight:bold;
+ }
