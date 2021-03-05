@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>登録データ管理</title>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/locale/ja.js"></script> -->
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+<div>
+  <div display=flex>
+  <button display=block id="delite" style="margin: 30px;">データベースの情報削除</button>
+    削除対象: <input type="text" id="uname">
+  
+    <!-- <textarea id="text" cols="30" rows="10"></textarea> -->
+    <!-- <button id="send">送信</button>
+    <button id="get">取得</button> -->
+
+  </div>
+  <button id="alldelete" style="margin-left: 30px;margin-bottom: 10px;">全消し</button>
+  <div id="output" style="overflow: scroll; height: 300px; width:500px; border: 1px solid blue"></div>
+</div>
+
+<!-- <img src="" alt="" width="100px" height="100px"> -->
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyAMxb8_sIb8wVaQX-7Eg4StWsL3l6DnNMk",
+    authDomain: "fishing-chat-6c2d2.firebaseapp.com",
+    projectId: "fishing-chat-6c2d2",
+    storageBucket: "fishing-chat-6c2d2.appspot.com",
+    messagingSenderId: "186604074706",
+    appId: "1:186604074706:web:1dcadd0347c7d2428c1f0b"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  //ファイアーベースのデータベースにアクセス
+  let ref=firebase.database().ref();
+
+  // データベースに変更が加えられた場合に、最新のデータのスナップを取得
+  let childKeyList=[];
+  ref.on('value',(snapshot)=>{
+    snapshot.forEach((childSnapshot)=>{
+      var childkey = childSnapshot.key;
+      var childData = childSnapshot.val();
+      //追加された要素のキーを配列化⇒データベースの子要素にアクセスする際の名簿にする。
+      childKeyList.push(childkey);
+      let keylist =Array.from(new Set(childKeyList));
+      
+    })
+  })
+
+//消したいデータをクリック＝＞データのキー取得
+$("html").on("click",function(e){
+  console.log(e.target);
+  let str = e.target.textContent;
+  let array = str.split(':');
+  let deliteKey = array[0];
+  $("#uname").val(deliteKey);
+})
+
+
+  // データベース上の情報削除
+  $("#delite").on("click",function(){
+    let deliteTarget = $("#uname").val();
+    firebase.database().ref(deliteTarget).remove();
+    //残ったデータのキーを、再度配列化
+    childKeyList=[];
+    ref.on("value",(snapshot)=>{
+      snapshot.forEach((childSnapshot)=>{
+        let childkey = childSnapshot.key;
+        childKeyList.push(childkey);
+        let lastKeyList =Array.from(new Set(childKeyList));//削除前後の配列で重複するキーを削除するため
+        childKeyList = lastKeyList;
+        console.log(childKeyList);
+      })
+    })
+  })
+
+//  データベース全消し
+$("#alldelete").on("click",function(){
+    firebase.database().ref().remove();
+})
+
+
+  let n = 0;
+  // データベースに追加されたときに、データの更新を行う
+  ref.on("child_added", function(data){ //firebaseは、function(ココ)に変数を記載しておかなくていはいけない！ファイアーベースの決まり事。firebaseのドキュメントを確認しよう。
+    const v = data.val();
+                                         //onも、firebase特有のメソッドなので、ドキュメント見ると使い方書いてある！
+    const k = data.key; //ユニークのキー
+    const h = `<p>${k}:<br>${v.uname}<br>${v.name}/${v.size}<br>気温：${v.temp}℃/水温：${v.wtemp}℃/風：${v.wind}km/h<br>${v.day}<br>${v.desc}<br><img id="img${n}" src="${makeImg(v.img,n)}" alt="" width="100px" height="100px"></p>`;
+    // $("#get").on("click",function(){
+      $("#output").append(h);
+    // })
+    $("#output").animate({
+    scrollTop:$("#output")[0].scrollHeight
+  })
+   n++
+  });
+  
+  ref.on("child_removed",function(data){
+    let clearTarget = data.key;
+    let pList = document.querySelectorAll('p');
+     for(let i=0 ; i <= pList.length ; i++){
+       if(pList[i].outerHTML.indexOf(clearTarget)>=0){
+         pList[i].remove();
+       }
+     }
+  })
+
+  //firestorage関数
+   let storage = firebase.storage();
+   let pathRef = storage.ref('fish_imgs/');
+   let httpRef = storage.refFromURL('gs://fishing-chat-6c2d2.appspot.com/fish_imgs/*');
+ 
+  //  imageをDLするための関数
+   function makeImg(imgName,imgNum){
+  // const Img = document.querySelector("img");
+   storage.ref().child(`fish_imgs/${imgName}`).getDownloadURL().then(function(url){
+    let Img = document.querySelector(`#img${imgNum}`);
+    console.log(Img);
+    Img.src=url;
+  });
+}
+
+
+
+
+  // $("#text").on("keydown", function(e){
+  //   if(e.keyCode===13){
+      
+    // 時間取得
+  //     let $d = new Date().toLocaleString({ timeZone: 'Asia/Tokyo' });
+  //     console.log($d);
+  //     const uname = $("#uname").val();
+  //     const text = $("#text").val();
+  //     const msg = {
+  //     uname:uname, 
+  //     text:text,
+  //     time:$d
+  //   };
+  //   ref.push(msg);
+  //   console.log($("#output").height());
+  // }}
+
+  // );
+  
+// //送信ボタンを押したら→データベースにデータ送信
+// $("#send").on("click",function(){
+   
+//    const uname = $("#uname").val();
+//    const text = $("#text").val();
+//    const msg = {
+//      uname:uname, 
+//      comment:comment,
+//      time:new Date().toLocaleString({ timeZone: 'Asia/Tokyo' })
+//    };
+//    ref.push(msg);
+// //  });
+// console.log(data);
+//     console.log(data.val());
+//     console.log(k);   
+  
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

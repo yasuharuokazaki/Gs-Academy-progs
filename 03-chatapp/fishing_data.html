@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Data</title>
+    <meta name="descliption" content="a tool for fishing data">
+    <meta name="format-detection" contetn="telephone-no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="css_memo.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/locale/ja.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.9/firebase.js"></script>
+</head>
+<body class="bg-light">
+<h1 style="text-align: left;">Fishing Data</h1>
+<!-- ログイン画面 -->
+<div>
+  
+ <label for="username">
+   <input type="text" name="username" id="uname" placeholder="user name">
+  </label> 
+</div>
+
+
+<!-- 記録作成本体 -->
+<div class="base-wrapper" >
+        <div class="info-wrapper">
+            <p>Target-name | size</p>
+            <div class="input-group">
+                <input id="target-name" type="text" placeholder="target-name" aria-label="First name" class="form-control" flex-basis="70%" required>
+                <input id="target-size" type="text" placeholder="target-size(cm)"aria-label="Last name" class="form-control" flex-basis="30%">
+           </div>
+            <p>Descliption</p>
+            <div class="input-group">
+                <textarea id="target-descliption" class="form-control" aria-label="descliption"></textarea>
+            </div>
+            <p>Image</p>
+            <div class="input-group">
+                <input type="file" value="Upload" class="form-control" id="inputGroupFile04" accept="image/*" capure=""  aria-describedby="inputGroupFileAddon04" aria-label="Upload" >
+                <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Button</button>
+                
+            </div>
+            <progress value="0" max="100" id="uploadprog"></progress>
+        </div>
+        <div class="env-wrapper">
+            <p>Environment</p>
+            <label for="customRangeTemp" class="form-label">Temp <span id="tempSpn">--℃</span> </label>
+                <input type="range" class="form-range" id="customRangeTemp" min="-20" max="50">
+            
+            <label for="customRangeWtemp" class="form-label">Water temp<span id="WtempSpn">--℃</span></label>
+                <input type="range" class="form-range" id="customRangeWtemp" min="0" max="30">
+            <label for="customRangewinSpn" class="form-label wind-form">Wind<span id="winSpn">-km/h</span><span class="dirtext">Direction</span>
+              <select class="winDir" id="winDir">
+                <option value="北">北</option>
+                <option value="東">東</option>
+                <option value="南">南</option>
+                <option value="西">西</option>
+              </select>
+            </label>
+               <div class="wind-form">
+                
+                <input type="range" class="form-range" id="customRangewinSpn" min="0" max="30">
+              </div>
+             
+        </div>
+        
+        <!-- <ul class="dirlist">
+          <li>北</li>
+          <li>北東</li>
+          <li>東</li>
+          <li>南東</li>
+          <li>南</li>
+          <li>南西</li>
+          <li>西</li>
+          <li>北西</li>
+        </ul> -->
+</div>
+
+<!-- ここから、データベース反映 -->
+      <div class="button d-flex justify-content-center">
+        <button id="btn-save" type="button" class="btn btn-primary btn-lg">データ保存</button>
+        <button id="btn-clear" type="button" class="btn btn-danger btn-lg">ストレージ削除</button>
+        <button id="btn-something" type="button" class="btn btn-secondary btn-lg">データ反映</button>
+      </div>
+
+
+<h1 style="text-align: left;">Data Base</h1>
+  <div id="data-wrapper" class="database-wrapper">
+    <div class="memo-wrapper" id="memo-wrapper">
+        <div class="accordion" id="accordionExample">
+
+                   
+
+<!-- データ数に応じてアコーディオン挿入 -->
+
+
+          </div>
+    </div>
+  </div>
+
+  <script src="js_memo.js"></script>
+
+
+
+</script>
+</body>
+</html>

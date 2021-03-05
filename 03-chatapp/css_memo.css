@@ -1,0 +1,123 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    padding:20px;
+}
+.base-wrapper{
+    display: flex;
+    background-color: #ccc;
+    border-radius: 3px 3px 0 0;
+}
+
+.button{
+    align-items: center;
+    background-color: #ccc;
+    border-radius: 0 0 3px 3px;
+}
+
+.info-wrapper{
+    flex-basis: 60%;
+    margin:10px;
+}
+
+/* .target{
+    display: flex;
+    flex-direction: column;
+}
+.target-name{
+    flex-basis: 70%;
+}
+.target-name{
+    flex-basis: 30%;
+} */
+.env-wrapper{
+    flex-basis:40%;
+    margin:10px;
+    
+}
+
+p{
+    margin-top:5px;
+    margin-bottom:0;
+    color:red;
+}
+
+span{
+    border:1px solid;
+    background-color:white;
+    border-color: royalblue;
+}
+
+#WtempSpn{
+    margin-left:20px;
+    border-radius: 3px;
+   
+}
+
+#tempSpn{
+    margin-left:60px;
+    border-radius: 3px;
+}
+
+#winSpn{
+    margin-left:65px;
+    border-radius: 3px;
+}
+
+.winDir{
+    margin-left:50px;
+    border-radius: 3px;
+}
+
+.wind-form{
+    display:flex;
+}
+
+.dirtext{
+    background-color:#ccc;
+    border:none;
+    display:block;
+    margin-left:60px;
+}
+
+
+.card-wrapper{
+    display: flex;
+    background-color:white;
+    border-radius: 3px 3px 3px 3px;
+}
+
+.card-body{
+    flex-basis:70%;
+    margin-right: 5px;
+    background-color:white;
+    border-radius: 3px;
+}
+.env{
+    border: none;
+    font-size: 12px;
+}
+.img-box{
+    flex-basis: 30%;
+    margin: 5px;
+    background-color: #ccc;
+    border-radius: 3px;
+    
+}
+
+.database-wrapper{
+    border-radius: 3px;
+    padding:10px;
+    background-color:darkslategrey;
+}
+
+.card-header{
+    border-radius: 3px 3px 0 0 ;
+}
+
+.clear-btn{
+    border-radius: 3px;
+    font-size: 7px;
+}
