@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+               <!-- JavaScript-Loading-Image -->
+               <!-- https://github.com/blueimp/JavaScript-Load-Image -->
+    <!-- load-image  -->
+    <script src="location_get/js/load-image.all.min.js"></script>
+    <!-- required to parse Exif tags and cross-browser image orientation -->
+    <script src="location_get/js/load-image-exif.js"></script>
+    <!-- required to display text mappings for Exif tags -->
+    <script src="location_get/js/load-image-exif-map.js"></script> 
+
+              <!-- Bing-Map -->
+              <!-- https://docs.microsoft.com/en-us/bingmaps/v8-web-control/creating-and-hosting-map-controls/?toc=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fbingmaps%2Fv8-web-control%2Ftoc.json&bc=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2FBingMaps%2Fbreadcrumb%2Ftoc.json -->
+    <!-- refer Bing-Map -->
+    <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=Ar6rtSJI8k1ecF2oV15DK_0sod9DgO7ytoCh919_LgSpD_IjmFtqidoXH0RjqtpT' async defer></script>
+    <!-- refer Bmap-file -->
+    <script src="location_get/js/BmapQuery.js"></script>
+    <title>get lon&lat</title>
+</head>
+<body>
+
+    <!-- get img file -->
+    <input id="getfile" type="file">
+
+    <!-- space to display img -->
+    <div id="image" style="width:150px;height:150px;border:2px solid"></div>
+
+    <!-- table to display lat&lon -->
+    <table>
+        <tr>
+           <th>緯度(latitude)</th>
+           <td id="lat">"latitude is here"</td>
+        </tr>
+        <tr>
+            <th>経度(longitude)</th>
+            <td id="lon">"longitude is here"</td>
+        </tr>
+    </table>
+
+    <!-- space to display map -->
+    <div id="myMap" style='position:relative;width:600px;height:400px;'></div>
+
+
+
+    <!-- Script is follow -->
+<script>
+
+    //set elements into valiables
+      const lonTable = document.querySelector("#lon");
+      const latTable = document.querySelector("#lat");
+      const Img    = document.querySelector("#getfile");
+      const imgDiv = document.querySelector("#image");
+
+    //make valiables for accomodate some infomation
+      let Locationinfo; 
+      let Lon;
+      let Lat;
+
+    // valiables to accomodate the valiables that DMS(60進法) is changed into DEG（10進法）
+      let longitude; //= Number(Lon[0])+Number(Lon[1])/60+Number(Lon[2])/3600;
+      let latitude;  //= Number(Lat[0])+Number(Lat[1])/60+Number(Lat[2])/3600;
+
+    // object-val to accomodate locationinfo
+      let imgData={};      
+
+    //use load-img(=fileAPI) at the time Img is changed => get lat & lon
+      Img.onchange = function(){
+          loadImage(
+              this.files[0], //parameter for selected img
+              //get img-obj & data including lon&lat
+              function(img,data){
+                  imgDiv.innerHTML = "";  
+                  imgDiv.appendChild(img);
+                  //get exifdata of data-obj,then set the value into gpsInfo
+                  let gpsInfo = data.exif && data.exif.get('GPSInfo');
+
+                  //if gpsInfo is return,get the values.if not, return alert "none".
+                  if(gpsInfo){
+                      imgData = gpsInfo.getAll();  
+                      //write lon and lat in each table  
+                        lonTable.textContent = ":"+imgData.GPSLongitude;
+                        latTable.textContent = ":"+imgData.GPSLatitude;
+                      //save lon and lat to localstrage  
+                        localStorage.setItem("locationInfo",
+                        JSON.stringify({lon:`${imgData.GPSLongitude}`,lat:`${imgData.GPSLatitude}`})
+                        )
+                  }else{alert("none")};
+
+                    //get new lon&lat
+                      let n = getLonLat();
+                      Mapchange(n);
+              },
+              { 
+                  maxWidth:150,
+                  maxHeight:150,
+                  contain  : true,
+                  meta     : true 
+              }
+          )
+      }
+
+  //function to get lon&lat  
+  function getLonLat(){
+   
+      Locationinfo=JSON.parse(localStorage.getItem("locationInfo"));
+      Lon = Locationinfo.lon.split(",");
+      Lat = Locationinfo.lat.split(",");
+      longitude = Number(Lon[0])+Number(Lon[1])/60+Number(Lon[2])/3600;
+      latitude  = Number(Lat[0])+Number(Lat[1])/60+Number(Lat[2])/3600;
+       return [latitude,longitude];
+   }
+   let targetLat = getLonLat()[0];
+   let targetLon = getLonLat()[1];
+
+   
+
+  //The following represents call-back-function for Bing-Map
+    let map;
+    let pin=[];
+    let infobox;
+
+  //when HTTP-respnse is returned,this function is ran.
+   function GetMap(){
+     // make map instance
+     map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+       center: new Microsoft.Maps.Location(43.1489024,141.3840896),
+       mapTypeId: Microsoft.Maps.MapTypeId.aerial,
+       zoom:10
+     });
+    
+  }
+
+  //function to change map and make pins
+  function Mapchange(n){
+     //map change to target-area
+      map.setView({
+        mapTypeId:Microsoft.Maps.MapTypeId.aerial,
+        center: new Microsoft.Maps.Location(n[0],n[1]),
+        zoom:10
+      });
+     
+     //make pushpins with message-box
+     var pushpin = new Microsoft.Maps.Pushpin(map.getCenter(), null);
+     var infobox = new Microsoft.Maps.Infobox(map.getCenter(), { title: 'Map Center', description: 'Seattle', visible: false });
+      infobox.setMap(map);
+      Microsoft.Maps.Events.addHandler(pushpin, 'click', function () {
+          infobox.setOptions({ visible: true });
+      });
+      map.entities.push(pushpin);
+    
+   }
+ 
+   
+  
+      
+////////////////////The following is memo/////////////////////////////////////////////
+// //map change の一連の流れ
+// map.changeMap(47.6150, -122.1950, "aerial", 17);
+// let pin = map.pin(47.6149, -122.1941, "#ff0000");
+// const map = new Bmap("#myMap");
+// const map = new Bmap("#myMap");
+//     map.startMap(47.6149, -122.1941, "load", 10);
+//     let pin = map.pin(47.6149, -122.1941, "#ff0000");
+//     map.changeMap(47.6150, -122.1950, "aerial", 17);
+// pin = map.pin(targetLat,targetLon, "#ff0000");
+        // //make map instance 
+        // map = new Microsoft.Maps.Map("#myMap",{
+        //   center: new Microsoft.Maps.Location( targetLat,targetLon )
+        // });
+        
+        // //get map info
+        //  center=map.getCenter();
+
+        // //make pin instance
+        // pin = new Microsoft.Maps.Pushpin(center,{
+        //     color             : 'red',
+        //     draggable         : true,
+        //     enableClickedStyle:true,
+        //     visible           : true
+        // }) 
+    
+        // //map change to target-area
+                    //   map.changeMap(getLonLat()[0], getLonLat()[1], "aerial", 10);
+                    // //push a pin
+                    //   map.pin(getLonLat()[0],getLonLat()[1], "#ff0000");
+                    // //make infobox
+                    //   map.infobox(getLonLat()[0],getLonLat()[1],"targetname","description");
+                    //   // map.entities.push(pin);
+        //  pin.push(map.pin(n[0],n[1], "#ff0000","click:true","visible:false"));
+    //  for(let i=0 ; i < pin.lenght ; i++){
+    //    pin[i].addEventlistener("click",()=>{
+    //      console.log("hello")
+    //    })
+    //  }
+    
+     //make infobox
+      // let infobox = map.infobox(n[0],n[1],"targetname","description","visible:true");
+       // map.changeMap(n[0], n[1], "aerial", 10);
+       //  new Bmap("#myMap");
+    //  map.startMap(43.1489024,141.3840896,"aerial",10); 
+    </script>
+</body>
+</html>
