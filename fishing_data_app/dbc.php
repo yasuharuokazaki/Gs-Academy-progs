@@ -60,12 +60,10 @@ function getAllFile(){
 
 //データベース接続
 function connectDB(){
-// サクラサーバ用DB接続情報(データベース名と、ユーザー名、パスワードを各変数に格納)
-// $dbn = 'mysql:dbname=;host=' ;
-// $user='';
-// $pwd='';
+// // サクラサーバ用DB接続情報(データベース名と、ユーザー名、パスワードを各変数に格納)
 
-//ローカルホスト用DB接続
+
+// //ローカルホスト用DB接続
 $dbn = 'mysql:dbname=gs_db; charset=utf8;port=3306;host=localhost';//portとlocalhostは利用するサーバーによる。
 $user='root';
 $pwd='';
@@ -79,4 +77,17 @@ return $db;
 }finally{
    // $db=null;
 }
+}
+
+//loginチェック
+function loginCheck(){
+    if(!isset($_SESSION["session_id"]) || $_SESSION["session_id"]!=session_id()){
+        echo "ログインしていません。";
+        echo '<a href="app_register.php">新規登録</a>';
+        exit();
+    }else{
+        session_regenerate_id(true);
+        $_SESSION["session_id"]=session_id();
+    
+    }
 }
