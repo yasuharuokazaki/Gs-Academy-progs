@@ -3,6 +3,11 @@ session_start();
 require_once "dbc.php";
 
 loginCheck();
+if($_GET !== []){
+   var_dump($_GET);
+  }else{
+    echo "検索対象なし";
+  }
 
 if(!isset($_SESSION["session_id"]) || $_SESSION["session_id"]!=session_id()){
     echo "ログインしていません。";
@@ -18,13 +23,16 @@ if(!isset($_SESSION["session_id"]) || $_SESSION["session_id"]!=session_id()){
 $imgs="";
 $data=[];
 $dbo=connectDB();
+$user_id=$_SESSION['user_key'];
 
-$sql = "SELECT * FROM fishing_db ORDER BY id DESC ";
+$sql = "SELECT * FROM fishing_db
+        WHERE user_key=$user_id OR op_flag='1'
+        ORDER BY id DESC ";
 $stmt=$dbo->prepare($sql);
 $stmt->execute();
 while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
     $imgs .="<tr><td>".$row["fish_name"]."</td><td>".$row["file_name"]."</td></tr>";
-    array_push($data,[$row['longitude'],$row['latitude']]);
+    array_push($data,[$row['longitude'],$row['latitude']],$row['fish_name'],$row['setsumei'],$row['file_path'],$row['user_key']);
 }
 
 //phpからjavascriptに何か渡すには、Jsonを利用
@@ -60,32 +68,23 @@ $json_array = json_encode($data);
     <title>get lon&lat</title>
 </head>
 <body>
-<h3><a href="./app_top.php">fishig_data</a></h3>
+<h2 style="margin:0px"><a href="./app_top.php">fishig_data</a></h2>
+<p style="margin-top:0px">USER:<?=$_SESSION['name']?></p>
+<input id="user_key" type="hidden" value="<?=$_SESSION['user_key']?>">
    
   <section style="display:flex;flex-flow: row-reverse">
    <div id="img_wrap" style="width:350px">
-    <!-- get img file -->
-    <!-- <form action="">
-    <input id="getfile" type="file">
-    <button type="submit"></button>
-    </form> -->
-    <!-- space to display img -->
-    <!-- <div id="image" style="width:70px;height:70px;border:2px solid"></div> -->
+   
     <table>
-      <?= print $imgs ?>
+    <form action="" method="get">
+    <p>対象魚名で絞り込む</p>
+      <input name="serach" type="search" placeholder="キーワードを入力してください">
+      <input type="submit">
+    </form>
+      <!-- <?= print $imgs ?> -->
     </table>
 
-    <!-- table to display lat&lon -->
-    <!-- <table> -->
-        <!-- <tr>
-           <th>緯度(latitude)</th>
-           <td id="lat">"latitude is here"</td>
-        </tr>
-        <tr>
-            <th>経度(longitude)</th>
-            <td id="lon">"longitude is here"</td>
-        </tr> -->
-    <!-- </table> -->
+    
     </div>
     <!-- space to display map -->
      <div id="myMap" style='position:relative;width:600px;height:400px;'>
@@ -94,7 +93,9 @@ $json_array = json_encode($data);
     
   </section>
  
-    <!-- Script is follow -->
+
+
+ <!-- Script is follow -->
 
 <script>
 
@@ -102,21 +103,22 @@ let js_array = <?= $json_array;?>;
 console.log(js_array);
 
 
-   
+const user_key=document.querySelector("#user_key");
 
-  //The following represents call-back-function for Bing-Map
-    let map;
-    let pin=[];
-    let infobox;
 
-  
+//The following represents call-back-function for Bing-Map
+// let map;
+// let pin=[];
+// let infobox;
+
   //マップ作製
    function GetMap(){
       //マップのインスタンス作成
+     
        map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
        center: new Microsoft.Maps.Location(43.1489024,141.3840896),
        mapTypeId: Microsoft.Maps.MapTypeId.aerial,
-       zoom:10
+       zoom:8
      });
      
      //infoboxのインスタンス作成
@@ -131,14 +133,18 @@ console.log(js_array);
 
      //登録されているデータ数分のピン作成
      for(let i=0; i<= js_array.length;i++){
-
+      if(i%5==0){
        if( js_array[i][1]!==null && js_array[i][0]!==null){
           var point = new Microsoft.Maps.Location(Number(js_array[i][1]),Number(js_array[i][0]));
-          var pushpin = new Microsoft.Maps.Pushpin(point, null);
+          var pushpin = new Microsoft.Maps.Pushpin(point,{
+            
+           color: user_key.value==js_array[i+4]? 'red':'blue'  
+              
+       });
          
           pushpin.metadata={
-            title:'Pin title',
-            description:'Pin discription'
+            title:`${js_array[i+1]}`,
+            description:`${js_array[i+2]}<br><img src='${js_array[i+3]}'>`
           }
          //pushpinClickedという関数をクリックイベントに追加
          Microsoft.Maps.Events.addHandler(pushpin, 'click', pushpinClicked);
@@ -146,6 +152,7 @@ console.log(js_array);
        }else{
          continue;
        }
+      }
     }
 
     //pushpinClicked関数の定義

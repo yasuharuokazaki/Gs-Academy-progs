@@ -4,11 +4,11 @@ require_once "dbc.php";
 
 loginCheck();
 
-
+$user_id=$_SESSION['user_key'];
 $dbo = connectDB();
 
 //SQL作成
-$sql = "SELECT * FROM fishing_db";
+$sql = "SELECT * FROM fishing_db WHERE user_key=$user_id";
 
 $stmt = $dbo->prepare($sql);
 $status = $stmt->execute();

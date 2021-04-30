@@ -19,7 +19,7 @@ if($status == false){
   exit();
 }elseif($stmt->fetchColumn() > 0){
     echo "<p>すでに登録されているユーザです．</p>";
-    echo '<a href="app_login.php">login画面へ戻る</a>';
+    echo '<a href="index.php">login画面へ戻る</a>';
     exit();
 
 }
@@ -36,7 +36,7 @@ if($status == false){
         exit();
     }else{
         echo "<p>登録しました！</p>";
-        echo "<a href='app_login.php'>ログイン画面へ戻る</a>";
+        echo "<a href='index.php'>ログイン画面へ戻る</a>";
        
     }
     

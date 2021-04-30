@@ -1,12 +1,14 @@
 <?php
+session_start();
+// var_dump($_SESSION);
 // var_dump($_FILES) ;
-// var_dump(phpinfo());
+var_dump($_POST);
 
 
 //画像をupload/imagesフォルダにアップロード
 
 if(!isset($_POST["save"])){
-   
+   //pathinfo()は連想配列を返す
    $ext = pathinfo($_FILES['img']['name']);
    $perm = ['jpg','jpeg','png','gif'];
 
@@ -22,8 +24,10 @@ if(!isset($_POST["save"])){
       ];
       $err_msg = $msg[$_FILES['img']['error']];
    }elseif(!in_array(strtolower($ext['extension']),$perm)){
-   $err_msg = '画像以外のファイルはアップロードできません。';
+      //アップロードされたファイルの拡張子が、こちらが指定した拡張子か確認
+      $err_msg = '画像以外のファイルはアップロードできません。';
    }elseif(!@getimagesize($_FILES['img']['tmp_name'])){
+      //拡張子の偽造対策⇒画像サイズを取得する関数でサイズが取得できるかチェック
       $err_msg = 'ファイルの内容が画像ではありません。';
    }else{
       $src= $_FILES['img']['tmp_name'];
@@ -52,9 +56,18 @@ if(!isset($_POST["save"])){
     $data.= "<li>風速：{$_POST['win']}</li><input name='win' type='hidden' value={$_POST['win']}>";
     $data.= "<li>画像名：{$_FILES['img']['name']}</li><input name='file_name' type='hidden' value={$_FILES['img']['name']}>";
     $data.= "<input name='file_path' type='hidden' value='upload/images/"."{$_FILES['img']['name']}"."'>";
+   //公開許可するか
+   if(isset($_POST['op_flag'])){
+    $data.= "<li>公開可否：可</li><input name='op_flag' type='hidden' value=1>";
+   }else{
+      $data.= "<li>公開可否：否</li><input name='op_flag' type='hidden' value=0>";
+   }
+   //ここまで
     $data.= "<input name='longitude' type='hidden' value={$_POST['longitude']}>";
     $data.= "<input name='latitude' type='hidden' value={$_POST['latitude']}></ul>";
 }
+
+// exit("test");
 
 if(isset($_POST['save'])==true){
    // var_dump($_POST);
@@ -65,9 +78,12 @@ $dbo=connectDB();
 
 
 //SQLを作成して実行($_POSTで受け取ったものをそのままSQRの中に埋め込むのは危険！⇒バインドバリューを用いて対応！)
-$sql = "INSERT INTO fishing_db(id,fish_name,fish_size,setsumei,temp,water_temp,win_dir,win,file_name,file_path,longitude,latitude) VALUES(NULL,:name,:size,:text,:temp,:water_temp,:win_dir,:win,:file_name,:file_path,:longitude,:latitude)";
+$sql = "INSERT
+ INTO fishing_db(id,user_key,fish_name,fish_size,setsumei,temp,water_temp,win_dir,win,file_name,file_path,longitude,latitude,op_flag)
+ VALUES(NULL,:user_key,:name,:size,:text,:temp,:water_temp,:win_dir,:win,:file_name,:file_path,:longitude,:latitude,:op_flag)";
 
 $stmt=$dbo -> prepare($sql);//DBインスタンスのprepareメソッド（＝引数として渡したSQRを実行するメソッド）を実施。
+$stmt->bindValue(':user_key',$_SESSION['user_key'],PDO::PARAM_INT);
 $stmt->bindValue(':name',$_POST['name'],PDO::PARAM_STR);
 $stmt->bindValue(':size',$_POST['size'],PDO::PARAM_INT);
 $stmt->bindValue(':text',$_POST['text'],PDO::PARAM_STR);
@@ -80,9 +96,10 @@ $stmt->bindValue(':win',$_POST['win'],PDO::PARAM_INT);
 $stmt->bindValue(':file_name',$_POST['file_name'],PDO::PARAM_STR);
 //FILESを書き換えてます！'upload/images/'.$_FILES['img']['name']=>$_POST['file_path']
 $stmt->bindValue(':file_path',$_POST['file_path'],PDO::PARAM_STR);
-
 $stmt->bindValue(':longitude',$_POST['longitude'],PDO::PARAM_STR);
 $stmt->bindValue(':latitude',$_POST['latitude'],PDO::PARAM_STR);
+$stmt->bindValue(':op_flag',$_POST['op_flag'],PDO::PARAM_INT);
+// $stmt->bindValue(':op_flag',$_POST['op_flag'],PDO::PARAM_INT);
 $stmt->execute();//executeメソッド＝実行しろ！っていう命令
 
 // }

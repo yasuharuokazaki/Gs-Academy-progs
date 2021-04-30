@@ -4,7 +4,7 @@ session_start();
 require_once "dbc.php";
 
 loginCheck();
-
+var_dump($_SESSION);
 
 ?>
 
@@ -32,6 +32,8 @@ loginCheck();
 
 <body class="bg-light">
 <h1 style="text-align: left;">Fishing Data</h1>
+<span style="size: 5px;">USER:<?=$_SESSION['name']?></span>
+
 <!-- ログイン画面 -->
 <div>
   
@@ -112,12 +114,17 @@ loginCheck();
                   <input name="win" type="text" class="form-range" id="customRangewinSpn" style="background-color: #ffffff"
                   placeholder=" --km/h">
                 </div>
-                 
+                
           </div>
+          
   </div>
- 
+  
       <div class="button d-flex justify-content-center">
+      
         <button id="btn-save" type="submit" class="btn btn-primary btn-lg">データ保存</button>
+         <p style="margin-left: 10px;">公開可否<br>
+          <label><input type="checkbox" value="1" name="op_flag" checked>許可</label>
+         </p>
       </div>
    </form> 
    
@@ -157,7 +164,7 @@ loginCheck();
       imgDiv.appendChild(img);
 
       let gpsInfo = data.exif && data.exif.get('GPSInfo');
-     
+      console.log(data);
       if(gpsInfo){
         
         imgData = gpsInfo.getAll();

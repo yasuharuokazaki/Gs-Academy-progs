@@ -28,7 +28,7 @@ function dbc(){
 @param string $filename ファイル名
 @param string $save_path 保存先のパス
 @param bool $result 
-*/
+// */
 function fileSave($filename,$save_path,$description){
      $result = false;
 
@@ -41,7 +41,7 @@ function fileSave($filename,$save_path,$description){
         $stmt->bindValue(3,$description);
         $result = $stmt->execute();
         return $result;
-     }catch(\Exception $e){
+     }catch(PDOException $e){
         echo $e->getMessage();
         return $result;
      }
@@ -61,21 +61,22 @@ function getAllFile(){
 //データベース接続
 function connectDB(){
 // // サクラサーバ用DB接続情報(データベース名と、ユーザー名、パスワードを各変数に格納)
+// $dbn = 'mysql:dbname=fishing-logi_data_base;charset=utf8;port=3306;host=mysql1033.db.sakura.ne.jp' ;
+// $user='fishing-logi';
+// $pwd='1o19fishingl0gi';
 
-
-// //ローカルホスト用DB接続
+// // //ローカルホスト用DB接続
 $dbn = 'mysql:dbname=gs_db; charset=utf8;port=3306;host=localhost';//portとlocalhostは利用するサーバーによる。
 $user='root';
 $pwd='';
 
-// DB接続(指定したDBにアクセスしてインスタンス生成⇒変数に格納)
+// // DB接続(指定したDBにアクセスしてインスタンス生成⇒変数に格納)
 try{
 $db = new PDO($dbn,$user,$pwd);
 return $db;
 }catch(PDOException $e){
    print "接続エラー:{$e->getMessage()}";
-}finally{
-   // $db=null;
+   exit();
 }
 }
 
