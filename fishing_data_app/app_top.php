@@ -4,7 +4,7 @@ session_start();
 require_once "dbc.php";
 
 loginCheck();
-var_dump($_SESSION);
+// var_dump($_SESSION);
 
 ?>
 
@@ -40,7 +40,7 @@ var_dump($_SESSION);
 
    <a name="location" target="_blank" href="get_location_test.php"><h2>地図情報</h2></a>
    <a href="logout.php">ログアウト</a>
-
+<a href="csv_write.php">データ分析</a>
    <!-- <input type="text" name="username" id="uname" placeholder="user name"> -->
  
 </div>
@@ -89,33 +89,56 @@ var_dump($_SESSION);
           
           <!-- フィールド情報 -->
           <div class="env-wrapper">
-              <p>Environment</p>
-
+              <p>Environment<span style="font-size: 5px;border:none;margin-left:10px;background-color:yellow;color:black">※自動取得します</span></p>
+              <p style="font-size:5px">修正する場合は直接入力してください</p>
               <!-- 気温<span id="tempSpn">--℃</span> -->
               <label for="customRangeTemp" class="form-label">Temp </label>
-                  <input name="temp" type="text" class="form-range" id="customRangeTemp" style="background-color: #ffffff"
-                  placeholder=" --℃"> 
-              
+                <div style="display: flex;">
+                  <input name="temp" type="text" class="form-range" id="customRangeTemp" style="background-color: #ffffff;width:80px;"
+                  placeholder=" --℃">
+                  <p style="line-height:10px;color:black;margin-left:5px">℃</p>
+                </div>
               <!-- 水温<span id="WtempSpn">--℃</span> -->
               <label for="customRangeWtemp" class="form-label" style="margin-top: 5px;margin-bottom:10px">Water temp</label>
-                  <input name="water_temp" type="text" class="form-range" id="customRangeWtemp" style="background-color: #ffffff"
+                <div style="display: flex;">
+                  <input name="water_temp" type="text" class="form-range" id="customRangeWtemp" style="background-color: #ffffff;width:80px;"
                   placeholder=" --℃">
-
+                  <p style="line-height:10px;color:black;margin-left:5px">℃</p>
+                  </div>
               <!-- 風<span id="winSpn">-km/h</span>-->
-              <label for="customRangewinSpn" class="form-label wind-form" style="margin-top: 10px;margin-bottom:2px">Wind<span class="dirtext"style="margin-top: 10px;">Direction</span>
-                <select name="win_dir" class="winDir" id="winDir" style="margin-top: 10px;margin-left:5px">
+              <label for="customRangewinSpn" class="form-label wind-form" style="margin-top: 10px;margin-bottom:2px">Wind
+              <span class="dirtext"style="margin-left: 100px;">Direction
+              </label>
+              <div style="display: flex;">
+                <div class="wind-form">
+                  <input name="win" type="text" class="form-range" id="customRangewinSpn" style="background-color: #ffffff;width:80px;"
+                  placeholder=" --km/h">
+                </div>
+                <p style="line-height:10px;color:black;margin-left:5px">km/h</p>
+                
+                
+                <select name="win_dir" class="winDir" id="winDir" style="margin-top: 0px;margin-left:30px">
+                
                   <option value="北">北</option>
                   <option value="東">東</option>
                   <option value="南">南</option>
                   <option value="西">西</option>
                 </select>
-              </label>
-                <div class="wind-form">
-                  <input name="win" type="text" class="form-range" id="customRangewinSpn" style="background-color: #ffffff"
-                  placeholder=" --km/h">
-                </div>
-                
+                </span>
+              </div>
+
+              <!-- 気圧-->
+          
+                <label for="customRangepressure" class="form-label wind-form" style="margin-top: 10px;margin-bottom:2px">Pressure
+                </label>
+                <div style="display: flex;">
+                <input name="win" type="text" class="form-range" id="customRangepressure" style="background-color: #ffffff;width:80px;"
+                    placeholder=" --hPa">
+                  <p style="line-height:10px;color:black;margin-left:5px">hPa</p>
+              </div>
+              
           </div>
+          
           
   </div>
   
@@ -146,6 +169,10 @@ var_dump($_SESSION);
  const imgDiv = document.querySelector("#image");
  const lonData = document.querySelector("#lon");
  const latData = document.querySelector("#lat");
+ const temp = document.querySelector("#customRangeTemp");
+ const watertemp = document.querySelector("#customRangeWtemp");
+ const wind =document.querySelector("#customRangewinSpn");
+ const pressure =document.querySelector("#customRangepressure");
 
  let LocationInfo;
  let Lon;
@@ -164,9 +191,10 @@ var_dump($_SESSION);
       imgDiv.appendChild(img);
 
       let gpsInfo = data.exif && data.exif.get('GPSInfo');
-      console.log(data);
+      console.log(data.exif[306].substring(0,10));
+      // data.exif[306)]
       if(gpsInfo){
-        
+       ;
         imgData = gpsInfo.getAll();
        let dmsLon = imgData.GPSLongitude;
        let dmsLat = imgData.GPSLatitude;
@@ -178,6 +206,8 @@ var_dump($_SESSION);
        locationData.push(degLat);
        lonData.value=locationData[0];
        latData.value=locationData[1];
+       let Time = data.exif[306].substring(0,10);
+       getWather(degLat,degLon,Time);
       }else{alert("faled to get ")}},
       { 
                   maxWidth:150,
@@ -189,8 +219,24 @@ var_dump($_SESSION);
    )
  }
 
- 
+function getWather(lat,lng,time){
+// const lat = 43.1544;
+// const lng = 141.1518;
+const params = 'waveHeight,airTemperature,waterTemperature,pressure,cloudCover,windSpeed,windDirection';
 
+fetch(`https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}&start=${time}&end=${time}`, {
+  headers: {
+    'Authorization': '80d40762-b70b-11eb-80d0-0242ac130002-80d407da-b70b-11eb-80d0-0242ac130002'
+  }
+}).then((response) => response.json()).then((jsonData) => {
+  // Do something with response data.
+  console.log(jsonData);
+  temp.value=jsonData.hours[0].airTemperature.sg;
+  watertemp.value=jsonData.hours[0].waterTemperature.sg;
+  wind.value=jsonData.hours[0].windSpeed.sg;
+  pressure.value=jsonData.hours[0].pressure.sg;
+});
+};
   </script>
  
 

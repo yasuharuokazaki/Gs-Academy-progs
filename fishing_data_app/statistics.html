@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+<script src='https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.js" integrity="sha512-opXrgVcTHsEVdBUZqTPlW9S8+99hNbaHmXtAdXXc61OUU6gOII5ku/PzZFqexHXc3hnK8IrJKHo+T7O4GRIJcw==" crossorigin="anonymous"></script>
+    <title>分析シート</title>
+</head>
+<body>
+<a href="app_top.php">アプリトップへ</a>
+<canvas id="myChart" width="50px" height="50px"></canvas>
+
+<script>
+let fishNames=[]
+let result = []
+let a;
+
+getCSV();//resultをreturnして統計出す。
+
+function getCSV(){
+    var req = new XMLHttpRequest(); // HTTPでファイルを読み込むためのXMLHttpRrequestオブジェクトを生成
+    req.open("get", "data.csv", true); // アクセスするファイルを指定
+    req.send(null); // HTTPリクエストの発行
+	
+    // レスポンスが返ってきたらconvertCSVtoArray()を呼ぶ	
+    req.onload = function(){
+    // console.log('test');
+
+      convertCSVtoArray(req.responseText);
+	// 渡されるのは読み込んだCSVデータ
+   
+    // console.log(result)
+    getNameList();
+    // return result;
+    }
+    
+}
+
+function convertCSVtoArray(str){ // 読み込んだCSVデータが文字列として渡される
+    ; // 最終的な二次元配列を入れるための配列
+    var tmp = str.split("\n"); // 改行を区切り文字として行を要素とした配列を生成
+ 
+    // 各行ごとにカンマで区切った文字列を要素とした二次元配列を生成
+    for(var i=0;i<tmp.length;++i){
+        result[i] = tmp[i].split(',');
+    }
+    
+    // return result;
+    
+}
+
+
+
+function getNameList(){
+for(let i = 1; i<result.length;i++){ 
+fishNames.push(result[i][0]);
+console.log('test');
+}
+
+let nameList = new Set(fishNames);
+let l = nameList.size;
+labelList=Array.from(nameList).slice(0,l-1);
+// let b=`${a}`;
+console.log(l);
+makeGluf()
+}
+let labelList
+
+//グラフ作成
+function makeGluf(){
+    
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            // labels: [
+            //     "赤", "青", "黄色", "緑", "紫", "橙"],
+            labels:labelList,
+            datasets: [{
+                label: '登録数',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+}
+
+    </script>
+
+</body>
+</html>

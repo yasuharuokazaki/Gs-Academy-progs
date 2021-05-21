@@ -3,11 +3,7 @@ session_start();
 require_once "dbc.php";
 
 loginCheck();
-if($_GET !== []){
-   var_dump($_GET);
-  }else{
-    echo "検索対象なし";
-  }
+
 
 if(!isset($_SESSION["session_id"]) || $_SESSION["session_id"]!=session_id()){
     echo "ログインしていません。";
@@ -25,6 +21,32 @@ $data=[];
 $dbo=connectDB();
 $user_id=$_SESSION['user_key'];
 
+//検索対象がなければ、本人+公開情報を表示、検索かけたら、本人+公開情報+検索対象魚のみ表示
+if(isset($_GET["serach"]) && $_GET["serach"]!== ""){
+  // var_dump($_GET);
+  $serach=$_GET['serach'];
+  // $dbo=connectDB();
+  // $user_id=$_SESSION['user_key'];
+  $sql = "SELECT * FROM fishing_db
+       WHERE (user_key=$user_id OR op_flag='1')
+       AND fish_name='$serach'
+       ORDER BY id DESC ";
+
+  $stmt=$dbo->prepare($sql);
+  
+  $stmt->execute();
+  while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
+      $imgs .="<tr><td>".$row["fish_name"]."</td><td>".$row["file_name"]."</td></tr>";
+      array_push($data,[$row['longitude'],$row['latitude']],$row['fish_name'],$row['setsumei'],$row['file_path'],$row['user_key']);
+  }
+  
+  //phpからjavascriptに何か渡すには、Jsonを利用
+  $json_array = json_encode($data);
+
+ }else{
+  //  echo "検索対象なし";
+ 
+
 $sql = "SELECT * FROM fishing_db
         WHERE user_key=$user_id OR op_flag='1'
         ORDER BY id DESC ";
@@ -34,7 +56,7 @@ while($row=$stmt->fetch(PDO::FETCH_ASSOC)){
     $imgs .="<tr><td>".$row["fish_name"]."</td><td>".$row["file_name"]."</td></tr>";
     array_push($data,[$row['longitude'],$row['latitude']],$row['fish_name'],$row['setsumei'],$row['file_path'],$row['user_key']);
 }
-
+}
 //phpからjavascriptに何か渡すには、Jsonを利用
 $json_array = json_encode($data);
 ?>
@@ -71,15 +93,18 @@ $json_array = json_encode($data);
 <h2 style="margin:0px"><a href="./app_top.php">fishig_data</a></h2>
 <p style="margin-top:0px">USER:<?=$_SESSION['name']?></p>
 <input id="user_key" type="hidden" value="<?=$_SESSION['user_key']?>">
-   
+ <p>※自分の情報：赤ピン<br>他人の情報:青ピン</p>  
   <section style="display:flex;flex-flow: row-reverse">
    <div id="img_wrap" style="width:350px">
    
     <table>
     <form action="" method="get">
+    <div style="margin-left:10px">
     <p>対象魚名で絞り込む</p>
       <input name="serach" type="search" placeholder="キーワードを入力してください">
       <input type="submit">
+      <p style="color:red">リセット：「キーワードを入力せず送信」を押してください。</p>
+    </div>
     </form>
       <!-- <?= print $imgs ?> -->
     </table>
